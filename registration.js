@@ -1,50 +1,132 @@
-let todoInput = document.querySelector(".input");
-let addTodoButton = document.querySelector(".add-button");
-let showTodos = document.querySelector(".todos-container");
-let todo;
+let formData = document.querySelector(".form");
+let submitButton = document.querySelector(".button");
+let errorMessages = document.querySelectorAll(".error-message");
+let emptyFieldMessage = document.querySelectorAll(".empty-field");
+let firstName, lastName, email, password;
+let fnTarget, lnTarget, emailTarget, pwdTarget;
+let field;
+let showBtnPassword = document.querySelector(".btn");
+let fnFlag = false, lnFlag = false, emailFlag = false, pwdFlag = false;
 
-let localData = JSON.parse(localStorage.getItem("todo"));
-let todoList = localData || [];
+let nameRegx = /^[a-z," "]+$/i;
+let emailRegx = /^\w+([.-]?\w+)*@\w+([.-]?\w)*(\.\w{2,3})+$/;
+let passwordRegx = /^(?=.*\d)(?=.*[@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/
 
-// Creating function to get unique identification(id)
-function uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxx'.replace(/[xy]/g, function(param) {
-        let number = Math.random() * 16 | 0;
-        let randomNumber = param == 'x' ? number : (number & 0x3 | 0x8);
-        return randomNumber.toString(16);
-    });
+for(let errorMessage of errorMessages) {
+    errorMessage.classList.add("d-none");
 }
-addTodoButton.addEventListener("click", (event) => {
+
+for(let element of emptyFieldMessage) {
+    element.classList.add("d-none");
+}
+
+formData.addEventListener("keyup", (event) => {
     event.preventDefault();
-    todo = todoInput.value;
-    if(todo.length > 0) {
-        todoList.push({id: uuid(), todo, isCompleted: false});
+    field = event.target.dataset.key;
+    switch(field) {
+        case "firstName":
+            firstName = event.target.value;
+            fnTarget = event.target;
+            break;
+        case "lastName":
+            lastName = event.target.value;
+            lnTarget = event.target;
+            break;
+        case "email":
+            email = event.target.value;
+            emailTarget = event.target;
+            break;
+        case "password":
+            password = event.target.value;
+            pwdTarget = event.target;
+            break;
+        default:
+            firstName = lastName = email = password = "";
+            break;
     }
-    localStorage.setItem("todo", JSON.stringify(todoList));
-    renderTodoList(todoList);
-    todoInput.value = "";
 });
 
-showTodos.addEventListener("click", (e) => {
-    let key = e.target.dataset.key;
-    let delTodokey = e.target.dataset.todokey;
-    todoList = todoList.map(todo => todo.id === key ? {...todo, isCompleted: !todo.isCompleted} : todo);
-    todoList = todoList.filter(todo => todo.id !== delTodokey);
-    localStorage.setItem("todo", JSON.stringify(todoList));
-    renderTodoList(todoList);
-})
+submitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    if(firstName) {
+        fnTarget.classList.add("error");
+        emptyFieldMessage[0].classList.add("d-none");
+        if(!nameRegx.test(firstName)) {
+            errorMessages[0].classList.remove("d-none");
 
-function renderTodoList(todoList) {
-    console.log(todoList);
-    showTodos.innerHTML = todoList.map(({id, todo, isCompleted}) => `
-    <div class="todo-item">
-        <input data-key=${id}  ${isCompleted ? "checked" : ""} id="item-${id}" type="checkbox" class="t-checkbox">
-        <label class="todo todo-text t-pointer ${isCompleted ? "checked-todo": ""}" for="item-${id}" data-key=${id}>${todo}</label>
-        <button class="del-button cursor">
-            <span class="material-icons-outlined" data-todokey=${id}> delete </span>
-        </button>
-    </div>
-    `);
-}
+        }
+        else {
+            fnTarget.classList.remove("error");
+            errorMessages[0].classList.add("d-none");
+            fnFlag = true;
+        }
+    }
+    else {
+        emptyFieldMessage[0].classList.remove("d-none");
+    }
+ 
 
-renderTodoList(todoList);
+    if(lastName) {
+        lnTarget.classList.add("error");
+        emptyFieldMessage[1].classList.add("d-none");
+        if(!nameRegx.test(lastName)) {
+            errorMessages[1].classList.remove("d-none");
+        }
+        else {
+            lnTarget.classList.remove("error");
+            errorMessages[1].classList.add("d-none");
+            lnFlag = true;
+        }
+    }
+    else {
+        emptyFieldMessage[1].classList.remove("d-none");
+    }
+
+
+    if(email) {
+        emailTarget.classList.add("error");
+        emptyFieldMessage[2].classList.add("d-none");
+        if(!emailRegx.test(email)) {
+            errorMessages[2].classList.remove("d-none");
+        }
+        else {
+            emailTarget.classList.remove("error");
+            errorMessages[2].classList.add("d-none");
+            emailFlag = true;
+        }
+    }
+    else {
+        emptyFieldMessage[2].classList.remove("d-none");
+    }
+
+    if(password) {
+        pwdTarget.classList.add("error");
+        emptyFieldMessage[3].classList.add("d-none");
+        if(!passwordRegx.test(password)) {
+            errorMessages[3].classList.remove("d-none");
+        }
+        else {
+            pwdTarget.classList.remove("error");
+            errorMessages[3].classList.add("d-none");
+            pwdFlag = true;
+        }
+    }
+    else {
+        emptyFieldMessage[3].classList.remove("d-none");
+    }
+    if(fnFlag && lnFlag && emailFlag && pwdFlag) {
+        fnTarget.value = lnTarget.value = emailTarget.value = pwdTarget.value = "";
+        window.location.href = "\success.html";
+    }
+});
+
+
+showBtnPassword.addEventListener("click", (event) => {
+    event.preventDefault();
+    if(pwdTarget.getAttribute("type") === "text") {
+        pwdTarget.setAttribute("type", "password");
+    }
+    else {
+        pwdTarget.setAttribute("type", "text");
+    }
+});
